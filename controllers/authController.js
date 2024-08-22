@@ -1,3 +1,5 @@
+const bcrypt= require('bcryptjs')
+const User = require("../models/userModel");
 const { userDataValidation } = require("../utils/authUtils");
 
 const registerController= async (req, res)=>{
@@ -14,11 +16,53 @@ const registerController= async (req, res)=>{
         })
     }
     
-    return res.send("register working")
+    // store user data
+    const obj= new User(req.body)
+    try {
+        const savedUser= await obj.registerUser()
+        return res.send({
+            status: 201,
+            message: "User registered successfully",
+            data: savedUser
+        })
+    } catch (error) {
+        return res.send({
+            status: 500,
+            message: "Internal server error",
+            error: error
+        })
+    }
+    
 }
 
-const loginController= (req, res)=>{
-    console.log("Login working");
+const loginController= async (req, res)=>{
+    const {loginId, password} = req.body
+    if(!loginId || !password) return res.send({status: 400, message: "Missing user credentials"})
+    
+    try {
+        // find the user
+        const userData= await User.findUserWithLoginId({loginId})
+        // compare the password
+        const isMatch= await bcrypt.compare(password, userData.password)
+        if(!isMatch) return res.send({status: 400, message: "Incorrect password"})
+        // session based auth
+        req.session.isAuth= true
+        req.session.user= {
+            username: userData.username,
+            email: userData.email,
+            id: userData._id
+        }
+
+    } catch (error) {
+        return res.send({
+            status: 500,
+            message: "Internal server error",
+            error: error
+        })
+    }
+    
+    
+    
     return res.send("Login working")
 }
 
