@@ -13,18 +13,25 @@ const store= new mongodbSession({
 // file-imports
 const dbConnect = require("./dbConnection")
 const authRouter = require('./routers/authRouter')
+const blogRouter = require('./routers/blogRouter')
+const isAuth = require('./middlewares/isAuthMidlleware')
 
 
-app.use(express.json())  // body parser
-// /auth/register
-// /auth/login
-app.use("/auth", authRouter)
+app.set("view engine", "ejs")
+
 app.use(session({
     secret: process.env.SECRET_KEY,
     store: store,
     resave: false, 
     saveUninitialized: false
 }))
+app.use(express.json())  // body parser
+app.use(express.urlencoded({ extended: true }));
+// /auth/register
+// /auth/login
+app.use("/auth", authRouter)
+app.use("/blog", isAuth, blogRouter)   // by adding isAuth here, we are protecting all the blog apis
+
 
 
 app.listen(PORT, ()=>{
