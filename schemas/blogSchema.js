@@ -13,7 +13,6 @@ const blogSchema= new Schema({
     textBody: {
         type: String,
         required: true,
-        unique: true,
         trim: true,
         minLength: 3,
         maxLength: 1000
