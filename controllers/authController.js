@@ -43,7 +43,7 @@ const loginController= async (req, res)=>{
     
     try {
         // find the user
-        const userData= await User.findUserWithLoginId({loginId})
+        const userData= await User.findUserWithkey({key : loginId})
         // compare the password
         const isMatch= await bcrypt.compare(password, userData.password)
         if(!isMatch) return res.send({status: 400, message: "Incorrect password"})

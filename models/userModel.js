@@ -1,5 +1,6 @@
 const bcrypt= require('bcryptjs')
 const userSchema= require('../schemas/userSchema');
+const { isValidObjectId } = require('mongoose');
 
 const User = class {
     username;
@@ -50,11 +51,13 @@ const User = class {
     }
 
 
-    static findUserWithLoginId({loginId}){
+    static findUserWithkey({key}){
         return new Promise(async (resolve, reject)=>{
             try {
+                console.log(isValidObjectId(key));
+                if(!key) reject("key is missing")
                 const userEntry= await userSchema.findOne({
-                    $or: [{email: loginId}, {username: loginId}]
+                    $or: [isValidObjectId(key) ? {_id: key} : {email: key}, {username: key}]
                 }).select("+password")
                 if(!userEntry) reject("User not found")
                 resolve(userEntry)

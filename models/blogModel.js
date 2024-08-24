@@ -92,4 +92,17 @@ const editBlog= ({title, textBody, blogId})=>{
         }
     })
 }
-module.exports= {createBlog, getAllBlogs, getMyBlogs, getBlogwithId, editBlog}
+
+const deleteBlog= ({blogId})=>{
+    return new Promise(async (resolve ,reject)=>{
+        try {
+            const deletedBlogData= await blogSchema.findOneAndDelete(
+                {_id: blogId}
+                )
+            resolve(deletedBlogData)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+module.exports= {createBlog, getAllBlogs, getMyBlogs, getBlogwithId, editBlog, deleteBlog}

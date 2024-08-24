@@ -1,6 +1,6 @@
 
 const blogDataValidator = require("../utils/blogUtils")
-const {createBlog, getAllBlogs, getMyBlogs, getBlogwithId, editBlog} = require("../models/blogModel")
+const {createBlog, getAllBlogs, getMyBlogs, getBlogwithId, editBlog, deleteBlog} = require("../models/blogModel")
 
 const createBlogController=async (req, res)=>{
     const {title, textBody}= req.body
@@ -106,6 +106,12 @@ const editBlogController= async (req, res)=>{
             })
         }
 
+        const diff= (Date.now() - blogData.creationDateTime)/(1000 * 60)
+        if(diff > 30) return res.send({
+            status: 400,
+            message: "Not allowed to edit after 30 mins of creation."
+        })
+
         const previousBlogData= await editBlog({title, textBody, blogId})
 
         return res.send({
@@ -124,4 +130,40 @@ const editBlogController= async (req, res)=>{
     
 }
 
-module.exports={createBlogController, getBlogsController, getMyBlogsController, editBlogController}
+const deleteBlogController= async (req, res)=>{
+    const {blogId}= req.body
+    const userId= req.session.user.userId
+
+    // find the blog
+    // ownership check
+    // delete the blog from db
+    try {
+        const blogData= await getBlogwithId({blogId})
+
+        if(!userId.equals(blogData.userId)) {  // using .equals because userId is in ObjectId format. ANd it doesnt support === operator
+            return res.send({
+                status: 403,
+                message: "Not allowed to edit the blog"
+            })
+        }
+
+        
+        const deletedBlogData= await deleteBlog({blogId})
+
+        return res.send({
+            status:200,
+            message: "Blog deleted successfully",
+            data: deletedBlogData
+        })
+    } catch (error) {
+        return res.send({
+            status: 500,
+            message: "Internal server error",
+            error: error
+        })
+    }
+    
+    
+}
+
+module.exports={createBlogController, getBlogsController, getMyBlogsController, editBlogController, deleteBlogController}
