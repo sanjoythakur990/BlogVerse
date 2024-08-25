@@ -16,6 +16,7 @@ const authRouter = require('./routers/authRouter')
 const blogRouter = require('./routers/blogRouter')
 const isAuth = require('./middlewares/isAuthMidlleware')
 const followRouter = require('./routers/followRouter')
+const cleanUpBin = require('./cron')
 
 
 app.set("view engine", "ejs")
@@ -38,4 +39,5 @@ app.use("/follow", isAuth, followRouter)
 
 app.listen(PORT, ()=>{
     console.log(cli.yellowBright.bold("Server is running on PORT: "+ PORT));
+    cleanUpBin()      // adding clean up here, because I want it to get executed when the server is running
 })

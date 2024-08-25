@@ -23,6 +23,9 @@ const getAllBlogs=({SKIP})=>{
         try {
             const blogEntries= await blogSchema.aggregate([
                 {
+                    $match: {isDeleted: {$ne: true}}
+                },
+                {
                     $sort: {creationDateTime: -1}  //  -1 -> desc order, +1 => asc order
                 },
                 {
@@ -46,7 +49,7 @@ const getMyBlogs= ({userId, SKIP})=>{
         try {
             const myBlogs= await blogSchema.aggregate([
                 {
-                    $match: {userId: userId}
+                    $match: {userId: userId, isDeleted: {$ne: true}}   // here not writing isDeleted: false, because there are entries which doesnt have isDeleted attribute, so 'not equal to true' will work 
                 },
                 {
                     $sort: {creationDateTime: -1}   // desc order => latest first
@@ -96,8 +99,12 @@ const editBlog= ({title, textBody, blogId})=>{
 const deleteBlog= ({blogId})=>{
     return new Promise(async (resolve ,reject)=>{
         try {
-            const deletedBlogData= await blogSchema.findOneAndDelete(
-                {_id: blogId}
+            // const deletedBlogData= await blogSchema.findOneAndDelete(
+            //     {_id: blogId}
+            //     )
+
+            const deletedBlogData= await blogSchema.findOneAndUpdate(
+                {_id: blogId}, {isDeleted: true, deletionDateTime: Date.now()}
                 )
             resolve(deletedBlogData)
         } catch (error) {

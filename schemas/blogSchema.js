@@ -28,6 +28,13 @@ const blogSchema= new Schema({
     },
     imagePath: {
         type: String
+    },
+    isDeleted: {       // adding these 2 attributes for delete blog api
+        type: Boolean,
+        default: false
+    },
+    deletionDateTime: {
+        type: String
     }
 })
 

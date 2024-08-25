@@ -54,7 +54,7 @@ const User = class {
     static findUserWithkey({key}){
         return new Promise(async (resolve, reject)=>{
             try {
-                console.log(isValidObjectId(key));
+                // console.log(isValidObjectId(key));
                 if(!key) reject("key is missing")
                 const userEntry= await userSchema.findOne({
                     $or: [isValidObjectId(key) ? {_id: key} : {email: key}, {username: key}]

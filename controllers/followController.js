@@ -1,11 +1,11 @@
-const { followUser, getFollowingList } = require("../models/followModel");
+const { followUser, getFollowingList, getFollowerList, unfollow } = require("../models/followModel");
 const User = require("../models/userModel");
 
 const followUserController= async (req,res)=>{
     const followingUserId= req.body.followingUserId
     const followerUserId= req.session.user.userId
 
-    console.log(followingUserId, followerUserId);
+    
     // checking if following user is present in the db or not
     try {
         await User.findUserWithkey({key: followingUserId})
@@ -51,12 +51,14 @@ const getFollowingListController= async (req,res)=>{
 
     try {
         const followingList= await getFollowingList({followerUserId, SKIP})
+
         return res.send({
             status: 200,
             message: "Read success",
             data: followingList
         })
     } catch (error) {
+
         return res.send({
             status: 500,
             message: "Internal server error",
@@ -66,4 +68,48 @@ const getFollowingListController= async (req,res)=>{
 
 }
 
-module.exports= {followUserController, getFollowingListController}
+const getFollowerListController=async (req,res)=>{
+    const followingUserId= req.session.user.userId
+    const SKIP= Number(req.query.skip) || 0
+
+    try {
+        const followerList= await getFollowerList({followingUserId, SKIP})
+
+        return res.send({
+            status: 200,
+            message: "Read success",
+            data: followerList
+        })
+    } catch (error) {
+
+        return res.send({
+            status: 500,
+            message: "Internal server error",
+            error: error
+        })
+    }
+
+}
+
+const unfollowController= async (req,res) => {
+    const followingUserId= req.body.followingUserId
+    const followerUserId= req.session.user.userId
+
+    try {
+        const deletedEntry= await unfollow({followerUserId, followingUserId})
+
+        return res.send({
+            status: 200, 
+            message: "Unfollowed successfully",
+            data: deletedEntry
+        })
+    } catch (error) {
+        return res.send({
+            status: 500,
+            message: "Internal server error",
+            error: error
+        })
+    }
+}
+
+module.exports= {followUserController, getFollowingListController, getFollowerListController, unfollowController}
